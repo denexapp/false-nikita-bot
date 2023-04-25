@@ -1,30 +1,30 @@
-#![deny(warnings)]
-
-use hyper::service::{make_service_fn, service_fn};
-use hyper::{Body, Request, Response, Server};
-use std::convert::Infallible;
 use std::net::SocketAddr;
-
-async fn rustless(_req: Request<Body>) -> Result<Response<Body>, Infallible> {
-    Ok(Response::new("Hello, Rustless!".into()))
-}
+use teloxide::{prelude::*, update_listeners::webhooks};
 
 #[tokio::main]
 async fn main() {
-    // Bind to 127.0.0.1:8080
+    pretty_env_logger::init();
+    log::info!("Starting false-nikita-bot...");
+
+    let bot = Bot::from_env();
+
+    let url = format!("https://false-nikita-bot-kliudduhya-lm.a.run.app/webhook")
+        .parse()
+        .unwrap();
+
     let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
 
-    // A `Service` is needed for every connection, so this
-    // creates one from our `rustless` function.
-    let make_svc = make_service_fn(|_conn| async {
-        // service_fn converts our function into a `Service`
-        Ok::<_, Infallible>(service_fn(rustless))
-    });
+    let listener = webhooks::axum(bot.clone(), webhooks::Options::new(addr, url))
+        .await
+        .expect("Couldn't setup webhook");
 
-    let server = Server::bind(&addr).serve(make_svc);
-
-    // Run this server for... forever!
-    if let Err(e) = server.await {
-        eprintln!("server error: {}", e);
-    }
+    teloxide::repl_with_listener(
+        bot,
+        |bot: Bot, msg: Message| async move {
+            bot.send_message(msg.chat.id, "pong").await?;
+            Ok(())
+        },
+        listener,
+    )
+    .await;
 }
