@@ -1,5 +1,15 @@
 use std::net::SocketAddr;
-use teloxide::{prelude::*, update_listeners::webhooks};
+use teloxide::{
+    prelude::*,
+    types::{KeyboardButton, KeyboardMarkup},
+    update_listeners::webhooks,
+};
+
+fn make_keyboard() -> KeyboardMarkup {
+    let button = KeyboardButton::new("Нажми меня!");
+    let keyboard: Vec<Vec<KeyboardButton>> = vec![vec![button]];
+    KeyboardMarkup::new(keyboard)
+}
 
 #[tokio::main]
 async fn main() {
@@ -21,7 +31,9 @@ async fn main() {
     teloxide::repl_with_listener(
         bot,
         |bot: Bot, msg: Message| async move {
-            bot.send_message(msg.chat.id, "pong").await?;
+            bot.send_message(msg.chat.id, "pong")
+                .reply_markup(make_keyboard())
+                .await?;
             Ok(())
         },
         listener,
