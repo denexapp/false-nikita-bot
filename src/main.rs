@@ -9,6 +9,9 @@ fn make_keyboard() -> KeyboardMarkup {
     let button = KeyboardButton::new("Нажми меня!");
     let keyboard: Vec<Vec<KeyboardButton>> = vec![vec![button]];
     KeyboardMarkup::new(keyboard)
+        .resize_keyboard(true)
+        .persistent()
+        .input_field_placeholder(String::from("test"))
 }
 
 #[tokio::main]
