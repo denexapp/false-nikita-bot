@@ -6,7 +6,11 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+firestore = "0.32.0"
 log = "0.4.17"
 pretty_env_logger = "0.4.0"
+rand = "0.8.5"
+reqwest = "0.11.17"
+serde = "1.0.160"
 teloxide = { version = "0.12.2", features = ["macros", "webhooks", "webhooks-axum"] }
 tokio = { version = "1.28.0", features = ["rt-multi-thread", "macros"] }
