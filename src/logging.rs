@@ -5,7 +5,7 @@ use teloxide::types::Message;
 fn get_username(message: &Message) -> String {
     if let Some(user) = message.from() {
         if let Some(username) = &user.username {
-            format!("{}, ({})", user.full_name(), username)
+            format!("{} (@{})", user.full_name(), username)
         } else {
             user.full_name()
         }
