@@ -1,5 +1,4 @@
 use firestore::{errors::FirestoreError, FirestoreDb};
-use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
 const TEXT_MESSAGES_COLLECTION: &str = "text_messages";
