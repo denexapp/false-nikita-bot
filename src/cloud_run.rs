@@ -1,6 +1,7 @@
 use std::env;
 
-use reqwest::{Client};
+use log::info;
+use reqwest::Client;
 use serde::Deserialize;
 use urlencoding::{decode, encode};
 
@@ -55,8 +56,23 @@ pub async fn get_service_uri(client: &Client, project_id: &str) -> String {
 
     let url = format!("https://run.googleapis.com/v2/projects/{encoded_project_id}/locations/{encoded_instance_region}/services/{encoded_service_name}");
 
-    let a: Service = client
-        .get(url)
+    let service = client
+        .get(&url)
+        .header("Metadata-Flavor", "Google")
+        .send()
+        .await
+        .expect("A request for Service information should not fail when sending")
+        .text()
+        .await
+        .expect("A request for Service information should not fail when awaiting for text");
+
+    info!(
+        "Cloud Admin API responded with the following text: {}",
+        service
+    );
+
+    let service: Service = client
+        .get(&url)
         .header("Metadata-Flavor", "Google")
         .send()
         .await
@@ -67,5 +83,5 @@ pub async fn get_service_uri(client: &Client, project_id: &str) -> String {
             "A request for Service information should not fail when awaiting for json and decoding",
         );
 
-    return a.uri;
+    return service.uri;
 }
