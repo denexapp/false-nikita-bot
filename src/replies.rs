@@ -3,6 +3,7 @@ use crate::{
     keyboard::make_keyboard,
 };
 use firestore::FirestoreDb;
+use rand::{rngs::OsRng, seq::SliceRandom};
 use teloxide::{
     prelude::*,
     types::{InputFile, VideoNote},
@@ -30,9 +31,15 @@ pub async fn send_random_video_note(
     chat_id: &ChatId,
     database: &FirestoreDb,
 ) -> Result<(), RequestError> {
-    if let Ok(result) = get_video_notes(database).await {
-        let video_note = InputFile::file_id(&result[0].file_id);
-        bot.send_video_note(*chat_id, video_note).await?;
+    if let Ok(video_notes) = get_video_notes(database).await {
+        let mut rng = OsRng::default();
+        if let Some(random_video_note) = video_notes.choose(&mut rng) {
+            let video_note = InputFile::file_id(&random_video_note.file_id);
+            bot.send_video_note(*chat_id, video_note).await?;
+        } else {
+            bot.send_message(*chat_id, "There's no video notes in the database")
+                .await?;
+        }
     } else {
         bot.send_message(*chat_id, "Database request Error")
             .reply_markup(make_keyboard())
@@ -46,8 +53,14 @@ pub async fn send_random_text_message(
     chat_id: &ChatId,
     database: &FirestoreDb,
 ) -> Result<(), RequestError> {
-    if let Ok(result) = get_text_messages(database).await {
-        bot.send_message(*chat_id, &result[0].text).await?;
+    if let Ok(text_messages) = get_text_messages(database).await {
+        let mut rng = OsRng::default();
+        if let Some(random_message) = text_messages.choose(&mut rng) {
+            bot.send_message(*chat_id, &random_message.text).await?;
+        } else {
+            bot.send_message(*chat_id, "There's no text messages in the database")
+                .await?;
+        }
     } else {
         bot.send_message(*chat_id, "Database request Error")
             .reply_markup(make_keyboard())
