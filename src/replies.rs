@@ -1,13 +1,14 @@
-use crate::{
-    database::{get_text_messages, get_video_notes},
-    keyboard::make_keyboard,
-};
 use firestore::FirestoreDb;
 use rand::{rngs::OsRng, seq::SliceRandom};
 use teloxide::{
     prelude::*,
     types::{InputFile, VideoNote},
     RequestError,
+};
+
+use crate::{
+    database::{get_text_messages, get_video_notes},
+    keyboard::make_keyboard,
 };
 
 pub async fn send_video_note_back_with_file_id(

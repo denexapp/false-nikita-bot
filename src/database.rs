@@ -15,17 +15,7 @@ pub struct VideoNote {
     pub file_id: String,
 }
 
-pub async fn get_database(client: &Client) -> FirestoreDb {
-    let project_id = client
-        .get("http://metadata.google.internal/computeMetadata/v1/project/project-id")
-        .header("Metadata-Flavor", "Google")
-        .send()
-        .await
-        .expect("A request for project ID should not fail when sending")
-        .text()
-        .await
-        .expect("A request for project ID should not fail when awaiting for text");
-
+pub async fn get_database(project_id: &String) -> FirestoreDb {
     FirestoreDb::new(project_id)
         .await
         .expect("FirestoreDb::new should return database client")

@@ -1,6 +1,7 @@
-use crate::parse_message::MessageKind;
 use log::info;
 use teloxide::types::Message;
+
+use crate::parse_message::MessageKind;
 
 fn get_username(message: &Message) -> String {
     if let Some(user) = message.from() {

@@ -1,4 +1,9 @@
+use std::net::SocketAddr;
+
+use teloxide::{prelude::*, update_listeners::webhooks};
+
 use crate::{
+    cloud_run::get_project_id,
     database::get_database,
     logging::log_incoming_message,
     parse_message::{parse_message, MessageKind},
@@ -6,14 +11,16 @@ use crate::{
         send_random_text_message, send_random_video_note, send_unknown_command_warning,
         send_video_note_back_with_file_id,
     },
+    webhook::get_webhook_url,
 };
-use std::net::SocketAddr;
-use teloxide::{prelude::*, update_listeners::webhooks};
+
+mod cloud_run;
 mod database;
 mod keyboard;
 mod logging;
 mod parse_message;
 mod replies;
+mod webhook;
 
 #[tokio::main]
 async fn main() {
@@ -21,13 +28,11 @@ async fn main() {
     log::info!("Starting false-nikita-bot...");
 
     let client = reqwest::Client::new();
-    let database = get_database(&client).await;
+    let project_id = get_project_id(&client).await;
+    let database = get_database(&project_id).await;
+    let url = get_webhook_url(&client, &project_id).await;
     let bot = Bot::from_env();
     let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
-
-    let url = "https://false-nikita-bot-kliudduhya-lm.a.run.app/webhook"
-        .parse()
-        .expect("Can't parse webhook callback url");
 
     let listener = webhooks::axum(bot.clone(), webhooks::Options::new(addr, url))
         .await
