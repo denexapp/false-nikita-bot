@@ -1,6 +1,5 @@
 use crate::{
     database::get_database,
-    keyboard::{TEXT_MESSAGE_BUTTON_TEXT, VIDEO_NOTE_BUTTON_TEXT},
     logging::log_incoming_message,
     parse_message::{parse_message, MessageKind},
     replies::{
@@ -8,7 +7,6 @@ use crate::{
         send_video_note_back_with_file_id,
     },
 };
-use log::info;
 use std::net::SocketAddr;
 use teloxide::{prelude::*, update_listeners::webhooks};
 mod database;
