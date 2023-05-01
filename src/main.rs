@@ -1,15 +1,20 @@
 use crate::{
     database::get_database,
     keyboard::{TEXT_MESSAGE_BUTTON_TEXT, VIDEO_NOTE_BUTTON_TEXT},
+    logging::log_incoming_message,
+    parse_message::{parse_message, MessageKind},
     replies::{
         send_random_text_message, send_random_video_note, send_unknown_command_warning,
         send_video_note_back_with_file_id,
     },
 };
+use log::info;
 use std::net::SocketAddr;
 use teloxide::{prelude::*, update_listeners::webhooks};
 mod database;
 mod keyboard;
+mod logging;
+mod parse_message;
 mod replies;
 
 #[tokio::main]
@@ -32,22 +37,25 @@ async fn main() {
 
     teloxide::repl_with_listener(
         bot,
-        move |bot: Bot, msg: Message| {
+        move |bot: Bot, message: Message| {
             let database = database.clone();
             async move {
-                let chat_id = msg.chat.id;
-                if let Some(video_note) = msg.video_note() {
-                    send_video_note_back_with_file_id(&bot, &chat_id, video_note).await?;
-                } else if let Some(text) = msg.text() {
-                    match text {
-                        TEXT_MESSAGE_BUTTON_TEXT => {
-                            send_random_text_message(&bot, &chat_id, &database).await?
-                        }
-                        VIDEO_NOTE_BUTTON_TEXT => {
-                            send_random_video_note(&bot, &chat_id, &database).await?
-                        }
-                        _ => send_unknown_command_warning(&bot, &chat_id).await?,
-                    };
+                let chat_id = message.chat.id;
+                let message_kind = parse_message(&message);
+                log_incoming_message(&message, &message_kind);
+                match message_kind {
+                    MessageKind::TextMessageButton => {
+                        send_random_text_message(&bot, &chat_id, &database).await?
+                    }
+                    MessageKind::VideoNoteButton => {
+                        send_random_video_note(&bot, &chat_id, &database).await?
+                    }
+                    MessageKind::VideoNote(video_note) => {
+                        send_video_note_back_with_file_id(&bot, &chat_id, video_note).await?
+                    }
+                    MessageKind::UnknownMessageWithText(_) | MessageKind::UnknownMessage => {
+                        send_unknown_command_warning(&bot, &chat_id).await?
+                    }
                 }
                 Ok(())
             }
