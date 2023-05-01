@@ -1,14 +1,16 @@
 use crate::{
-    database::{get_database, get_text_messages},
-    keyboard::make_keyboard,
-    video_note::send_video_note_back_with_file_id,
+    database::get_database,
+    keyboard::{TEXT_MESSAGE_BUTTON_TEXT, VIDEO_NOTE_BUTTON_TEXT},
+    replies::{
+        send_random_text_message, send_random_video_note, send_unknown_command_warning,
+        send_video_note_back_with_file_id,
+    },
 };
 use std::net::SocketAddr;
 use teloxide::{prelude::*, update_listeners::webhooks};
-mod consts;
 mod database;
 mod keyboard;
-mod video_note;
+mod replies;
 
 #[tokio::main]
 async fn main() {
@@ -16,15 +18,13 @@ async fn main() {
     log::info!("Starting false-nikita-bot...");
 
     let client = reqwest::Client::new();
-
-    let db = get_database(&client).await;
+    let database = get_database(&client).await;
     let bot = Bot::from_env();
+    let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
 
     let url = "https://false-nikita-bot-kliudduhya-lm.a.run.app/webhook"
         .parse()
-        .unwrap();
-
-    let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
+        .expect("Can't parse webhook callback url");
 
     let listener = webhooks::axum(bot.clone(), webhooks::Options::new(addr, url))
         .await
@@ -33,19 +33,21 @@ async fn main() {
     teloxide::repl_with_listener(
         bot,
         move |bot: Bot, msg: Message| {
-            let db = db.clone();
+            let database = database.clone();
             async move {
+                let chat_id = msg.chat.id;
                 if let Some(video_note) = msg.video_note() {
-                    send_video_note_back_with_file_id(&bot, &msg, video_note).await?;
-                } else {
-                    if let Ok(result) = get_text_messages(&db.clone()).await {
-                        bot.send_message(msg.chat.id, &result[0].text).await?;
-                    } else {
-                        bot.send_message(msg.chat.id, "Database request Error")
-                            .reply_markup(make_keyboard())
-                            .await?;
-                        return Ok(());
-                    }
+                    send_video_note_back_with_file_id(&bot, &chat_id, video_note).await?;
+                } else if let Some(text) = msg.text() {
+                    match text {
+                        TEXT_MESSAGE_BUTTON_TEXT => {
+                            send_random_text_message(&bot, &chat_id, &database).await?
+                        }
+                        VIDEO_NOTE_BUTTON_TEXT => {
+                            send_random_video_note(&bot, &chat_id, &database).await?
+                        }
+                        _ => send_unknown_command_warning(&bot, &chat_id).await?,
+                    };
                 }
                 Ok(())
             }
