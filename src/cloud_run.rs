@@ -94,7 +94,7 @@ pub async fn get_service_uri(client: &Client, project_id: &str) -> String {
 
     let service: Service = client
         .get(url)
-        .header("Metadata-Flavor", "Google")
+        .header("Authorization", format!("Bearer {access_token}"))
         .send()
         .await
         .expect("A request for Service information should not fail when sending")
