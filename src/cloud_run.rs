@@ -74,23 +74,7 @@ pub async fn get_service_uri(client: &Client, project_id: &str) -> String {
     let encoded_service_name = encode(&service_name);
 
     let url = format!("https://run.googleapis.com/v2/projects/{encoded_project_id}/locations/{encoded_instance_region}/services/{encoded_service_name}");
-
     let access_token = get_access_token(client).await;
-
-    let service = client
-        .get(&url)
-        .header("Authorization", format!("Bearer {access_token}"))
-        .send()
-        .await
-        .expect("A request for Service information should not fail when sending")
-        .text()
-        .await
-        .expect("A request for Service information should not fail when awaiting for text");
-
-    info!(
-        "Cloud Admin API responded with the following text: {}",
-        service
-    );
 
     let service: Service = client
         .get(url)
