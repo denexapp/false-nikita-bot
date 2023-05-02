@@ -1,6 +1,5 @@
 use std::env;
 
-use log::info;
 use reqwest::Client;
 use serde::Deserialize;
 use urlencoding::{decode, encode};
