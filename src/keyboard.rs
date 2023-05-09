@@ -1,12 +1,10 @@
 use teloxide::types::{KeyboardButton, KeyboardMarkup};
 
-pub const VIDEO_NOTE_BUTTON_TEXT: &str = "Кружочком";
-pub const TEXT_MESSAGE_BUTTON_TEXT: &str = "Текстом";
+pub const VIDEO_JOKE_BUTTON_TEXT: &str = "Никита, расскажи анекдот";
 
 pub fn make_keyboard() -> KeyboardMarkup {
-    let video_note = KeyboardButton::new(VIDEO_NOTE_BUTTON_TEXT);
-    let text_message = KeyboardButton::new(TEXT_MESSAGE_BUTTON_TEXT);
-    let keyboard: Vec<Vec<KeyboardButton>> = vec![vec![video_note, text_message]];
+    let video_joke = KeyboardButton::new(VIDEO_JOKE_BUTTON_TEXT);
+    let keyboard: Vec<Vec<KeyboardButton>> = vec![vec![video_joke]];
     KeyboardMarkup::new(keyboard)
         .resize_keyboard(true)
         .persistent()

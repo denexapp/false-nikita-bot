@@ -8,8 +8,7 @@ use crate::{
     logging::log_incoming_message,
     parse_message::{parse_message, MessageKind},
     replies::{
-        send_random_text_message, send_random_video_note, send_unknown_command_warning,
-        send_video_note_back_with_file_id,
+        send_random_video_joke, send_unknown_command_warning, send_video_note_back_with_file_id,
     },
     webhook::get_webhook_url,
 };
@@ -47,11 +46,8 @@ async fn main() {
                 let message_kind = parse_message(&message);
                 log_incoming_message(&message, &message_kind);
                 match message_kind {
-                    MessageKind::TextMessageButton => {
-                        send_random_text_message(&bot, &chat_id, &database).await?
-                    }
-                    MessageKind::VideoNoteButton => {
-                        send_random_video_note(&bot, &chat_id, &database).await?
+                    MessageKind::VideoJokeButton => {
+                        send_random_video_joke(&bot, &chat_id, &database).await?
                     }
                     MessageKind::VideoNote(video_note) => {
                         send_video_note_back_with_file_id(&bot, &chat_id, video_note).await?

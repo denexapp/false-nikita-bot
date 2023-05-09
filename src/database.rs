@@ -1,17 +1,11 @@
 use firestore::{errors::FirestoreError, FirestoreDb};
 use serde::{Deserialize, Serialize};
 
-const TEXT_MESSAGES_COLLECTION: &str = "text_messages";
-const VIDEO_NOTES_COLLECTION: &str = "video_notes";
+const VIDEO_JOKES_COLLECTION: &str = "video_notes";
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct TextMessage {
-    pub text: String,
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct VideoNote {
-    pub file_id: String,
+pub struct VideoJoke {
+    pub file_ids: Vec<String>,
 }
 
 pub async fn get_database(project_id: &String) -> FirestoreDb {
@@ -20,21 +14,11 @@ pub async fn get_database(project_id: &String) -> FirestoreDb {
         .expect("FirestoreDb::new should return database client")
 }
 
-pub async fn get_text_messages(db: &FirestoreDb) -> Result<Vec<TextMessage>, FirestoreError> {
+pub async fn get_video_jokes(db: &FirestoreDb) -> Result<Vec<VideoJoke>, FirestoreError> {
     Ok(db
         .fluent()
         .select()
-        .from(TEXT_MESSAGES_COLLECTION)
-        .obj()
-        .query()
-        .await?)
-}
-
-pub async fn get_video_notes(db: &FirestoreDb) -> Result<Vec<VideoNote>, FirestoreError> {
-    Ok(db
-        .fluent()
-        .select()
-        .from(VIDEO_NOTES_COLLECTION)
+        .from(VIDEO_JOKES_COLLECTION)
         .obj()
         .query()
         .await?)

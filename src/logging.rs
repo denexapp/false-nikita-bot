@@ -22,8 +22,7 @@ pub fn log_incoming_message(message: &Message, message_kind: &MessageKind) {
             "sent a video note with the following file id: {}",
             video_note.file.id
         ),
-        MessageKind::TextMessageButton => "pressed the text message button".to_string(),
-        MessageKind::VideoNoteButton => "pressed the video note button".to_string(),
+        MessageKind::VideoJokeButton => "pressed the video joke button".to_string(),
         MessageKind::UnknownMessageWithText(text) => {
             format!("sent an unknown message with the following text: {}", text)
         }

@@ -1,12 +1,11 @@
 use teloxide::types::{Message, VideoNote};
 
-use crate::keyboard::{TEXT_MESSAGE_BUTTON_TEXT, VIDEO_NOTE_BUTTON_TEXT};
+use crate::keyboard::VIDEO_JOKE_BUTTON_TEXT;
 
 // I don't know what a lifetime is tbh
 pub enum MessageKind<'a> {
     VideoNote(&'a VideoNote),
-    TextMessageButton,
-    VideoNoteButton,
+    VideoJokeButton,
     UnknownMessageWithText(String),
     UnknownMessage,
 }
@@ -16,8 +15,7 @@ pub fn parse_message(message: &Message) -> MessageKind {
         MessageKind::VideoNote(video_note)
     } else if let Some(text) = message.text() {
         match text {
-            TEXT_MESSAGE_BUTTON_TEXT => MessageKind::TextMessageButton,
-            VIDEO_NOTE_BUTTON_TEXT => MessageKind::VideoNoteButton,
+            VIDEO_JOKE_BUTTON_TEXT => MessageKind::VideoJokeButton,
             _ => MessageKind::UnknownMessageWithText(text.to_string()),
         }
     } else {
